@@ -260,6 +260,7 @@ interface ZoneStore {
   setSelectedId: (id: string) => void;
   updateZone: (id: string, patch: Partial<ZoneInputs>) => void;
   addZone: () => void;
+  recalculateAllZones: () => void;
 }
 
 export const useZoneStore = create<ZoneStore>((set, get) => ({
@@ -292,5 +293,13 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
       zones: [...s.zones, { inputs: newInput, results: calculateZone(newInput) }],
       selectedId: id,
     }));
+  },
+
+  recalculateAllZones: () => {
+    const zones = get().zones.map(({ inputs }) => ({
+      inputs,
+      results: calculateZone(inputs),
+    }));
+    set({ zones });
   },
 }));

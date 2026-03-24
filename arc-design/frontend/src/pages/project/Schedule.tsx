@@ -33,7 +33,9 @@ export default function Schedule() {
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-sm font-bold" style={{ color: '#1925AA' }}>Zone Schedule</h2>
-          <p className="text-[9px] text-muted-foreground">SHF = 1.213 W/(L/s·K) · SA = CEILING.MATH(max(load, ACH), 5) · HAP-derived solar loads</p>
+          <p className="text-[9px] text-muted-foreground">
+            Live from current project settings (weather + facade types) · SHF = 1.213 W/(L/s·K) · SA = CEILING.MATH(max(load, ACH), 5)
+          </p>
         </div>
         <div className="flex gap-1.5">
           <button className="h-7 px-2.5 text-[11px] font-medium border bg-white text-foreground rounded-sm hover:bg-secondary flex items-center gap-1.5">
@@ -42,8 +44,12 @@ export default function Schedule() {
           <button className="h-7 px-2.5 text-[11px] font-medium border bg-white text-foreground rounded-sm hover:bg-secondary flex items-center gap-1.5">
             <FileSpreadsheet className="h-3 w-3" /> XLSX
           </button>
-          <button className="h-7 px-2.5 text-[11px] font-medium text-white rounded-sm hover:opacity-90 flex items-center gap-1.5" style={{ background: '#1925AA' }}>
-            <RefreshCw className="h-3 w-3" /> Calculate All
+          <button
+            title="Values are live from project settings and update automatically."
+            className="h-7 px-2.5 text-[11px] font-medium text-white rounded-sm hover:opacity-90 flex items-center gap-1.5"
+            style={{ background: '#1925AA' }}
+          >
+            <RefreshCw className="h-3 w-3" /> Live Sync On
           </button>
         </div>
       </div>
@@ -232,7 +238,9 @@ export default function Schedule() {
       <div className="flex gap-4 text-[9px] text-muted-foreground mt-2">
         <span className="flex items-center gap-1"><span className="bg-green-100 text-green-700 px-1 rounded-sm font-bold">23.0°C</span> SA-T achievable — room temp in range</span>
         <span className="flex items-center gap-1"><span className="bg-red-100 text-red-600 px-1 rounded-sm font-bold">24.2°C</span> SA-T too warm — needs colder off-coil or more SA</span>
-        <span>SHF = 1.213 W/(L/s·K) · SA rounded up to nearest 5 L/s</span>
+        <span title="These values auto-refresh from project-level weather and facade edits.">
+          Live values from current project settings · SHF = 1.213 W/(L/s·K) · SA rounded up to nearest 5 L/s
+        </span>
       </div>
     </div>
   );
