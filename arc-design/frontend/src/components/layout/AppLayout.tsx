@@ -25,9 +25,12 @@ export default function AppLayout() {
         <div className="ml-auto flex items-center gap-3 text-xs">
           {projectName && (
             <nav className="flex items-center gap-0.5 mr-4">
+              <NavTab to={`/projects/${projectId}/info`} label="Project Info" />
               <NavTab to={`/projects/${projectId}/rooms`} label="Rooms" />
-              <NavTab to={`/projects/${projectId}/schedule`} label="Schedule" />
+              <NavTab to={`/projects/${projectId}/zones`} label="Zones" />
+              <NavTab to={`/projects/${projectId}/schedule`} label="Zone Schedule" />
               <NavTab to={`/projects/${projectId}/systems`} label="Systems" />
+              <NavTab to={`/projects/${projectId}/equipment`} label="Equip. Schedules" />
             </nav>
           )}
           <div className="h-6 w-6 rounded bg-secondary flex items-center justify-center text-[10px] font-bold text-secondary-foreground border">

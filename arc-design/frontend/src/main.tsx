@@ -11,6 +11,9 @@ import RoomDetail from './pages/project/RoomDetail';
 import RoomIndex from './pages/project/RoomIndex';
 import Schedule from './pages/project/Schedule';
 import Systems from './pages/project/Systems';
+import Zones from './pages/project/Zones';
+import ProjectInfo from './pages/project/ProjectInfo';
+import EquipmentSchedules from './pages/project/EquipmentSchedules';
 
 const queryClient = new QueryClient();
 
@@ -23,10 +26,13 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<AppLayout />}>
             <Route path="/projects" element={<Dashboard />} />
             <Route path="/projects/:projectId" element={<ProjectLayout />}>
+              <Route path="info" element={<ProjectInfo />} />
               <Route path="rooms" element={<RoomIndex />} />
               <Route path="rooms/:roomId" element={<RoomDetail />} />
+              <Route path="zones" element={<Zones />} />
               <Route path="schedule" element={<Schedule />} />
               <Route path="systems" element={<Systems />} />
+              <Route path="equipment" element={<EquipmentSchedules />} />
             </Route>
           </Route>
         </Routes>
