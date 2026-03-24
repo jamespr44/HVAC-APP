@@ -2,21 +2,16 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 
-// Mock data keyed by room ID
+// Mock data keyed by room ID — updated with new fields
 const ROOMS: Record<string, any> = {
-  r1: { tag: 'L1-01', name: 'Open Plan Office', floor: 'Level 1', area: 240, height: 3.0, orientation: 'N', occupants: 48, activity: 'Seated', lightingW: 12, equipW: 15, glaze: 20, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 40, humMax: 60, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Neutral', lsPerson: 10, lsM2: 0.5, designPress: 0, system: 'AHU-01', exhaustList: [], equipList: [{ desc: 'Workstations', qty: 48, watts: 120 }, { desc: 'Printers', qty: 2, watts: 500 }] },
-  r2: { tag: 'L1-02', name: 'Meeting Room A', floor: 'Level 1', area: 25, height: 3.0, orientation: 'E', occupants: 8, activity: 'Seated', lightingW: 12, equipW: 10, glaze: 30, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 40, humMax: 60, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Neutral', lsPerson: 10, lsM2: 0.5, designPress: 0, system: 'AHU-01', exhaustList: [], equipList: [{ desc: 'AV Display', qty: 1, watts: 350 }] },
-  r3: { tag: 'L1-03', name: 'Server Room', floor: 'Level 1', area: 18, height: 3.0, orientation: 'Internal', occupants: 0, activity: 'None', lightingW: 8, equipW: 0, glaze: 0, glassU: 0, shgc: 0, wallU: 0.35, extWall: false, roof: false, coolSet: 22, heatSet: 18, humMin: 40, humMax: 55, supplyAch: '15', returnAch: '', exhaustAch: '', filt: 'F9', pctOA: false, isolation: false, oaMethod: 'Custom', pressure: 'Positive', lsPerson: 0, lsM2: 0, designPress: 10, system: 'FCU-L1-01', exhaustList: [], equipList: [{ desc: 'Server Racks', qty: 4, watts: 2500 }] },
-  r4: { tag: 'L1-04', name: 'Toilet Block', floor: 'Level 1', area: 30, height: 3.0, orientation: 'Internal', occupants: 0, activity: 'None', lightingW: 8, equipW: 2, glaze: 0, glassU: 0, shgc: 0, wallU: 0.35, extWall: false, roof: false, coolSet: 24, heatSet: 20, humMin: 0, humMax: 0, supplyAch: '', returnAch: '', exhaustAch: '10', filt: 'G4', pctOA: false, isolation: false, oaMethod: 'ACH', pressure: 'Negative', lsPerson: 0, lsM2: 0, designPress: -15, system: 'EXH-01', exhaustList: [{ desc: 'Toilet exhaust', ls: 120, type: 'Continuous' }], equipList: [{ desc: 'Hand dryers', qty: 2, watts: 1800 }] },
-  r5: { tag: 'L1-05', name: 'Reception', floor: 'Level 1', area: 60, height: 4.5, orientation: 'NE', occupants: 6, activity: 'Seated', lightingW: 15, equipW: 10, glaze: 40, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 40, humMax: 60, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Positive', lsPerson: 10, lsM2: 0.5, designPress: 5, system: 'AHU-01', exhaustList: [], equipList: [] },
-  r6: { tag: 'L1-06', name: 'Kitchen', floor: 'Level 1', area: 35, height: 3.0, orientation: 'S', occupants: 12, activity: 'Light Work', lightingW: 12, equipW: 25, glaze: 10, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 0, humMax: 0, supplyAch: '', returnAch: '', exhaustAch: '12', filt: 'G4', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Negative', lsPerson: 10, lsM2: 1.0, designPress: -10, system: 'AHU-01', exhaustList: [{ desc: 'Kitchen hood', ls: 150, type: 'Intermittent' }], equipList: [{ desc: 'Dishwasher', qty: 1, watts: 2400 }, { desc: 'Microwave', qty: 2, watts: 1000 }, { desc: 'Fridge', qty: 1, watts: 200 }] },
-  r7: { tag: 'L2-01', name: 'Open Plan Office', floor: 'Level 2', area: 280, height: 3.0, orientation: 'N', occupants: 56, activity: 'Seated', lightingW: 12, equipW: 15, glaze: 20, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 40, humMax: 60, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Neutral', lsPerson: 10, lsM2: 0.5, designPress: 0, system: 'AHU-02', exhaustList: [], equipList: [{ desc: 'Workstations', qty: 56, watts: 120 }] },
-  r8: { tag: 'L2-02', name: 'Conference Room', floor: 'Level 2', area: 45, height: 3.0, orientation: 'E', occupants: 20, activity: 'Seated', lightingW: 12, equipW: 10, glaze: 25, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 24, heatSet: 20, humMin: 40, humMax: 60, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Neutral', lsPerson: 10, lsM2: 0.5, designPress: 0, system: 'AHU-02', exhaustList: [], equipList: [{ desc: 'Projector', qty: 1, watts: 450 }] },
-  r9: { tag: 'L2-03', name: 'Director Suite', floor: 'Level 2', area: 30, height: 3.0, orientation: 'N', occupants: 2, activity: 'Seated', lightingW: 12, equipW: 10, glaze: 35, glassU: 2.8, shgc: 0.4, wallU: 0.35, extWall: true, roof: false, coolSet: 23, heatSet: 21, humMin: 40, humMax: 60, supplyAch: '6', returnAch: '', exhaustAch: '', filt: 'F7', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Positive', lsPerson: 10, lsM2: 0.5, designPress: 5, system: 'AHU-02', exhaustList: [], equipList: [] },
-  r10: { tag: 'L2-04', name: 'Print Room', floor: 'Level 2', area: 20, height: 3.0, orientation: 'Internal', occupants: 0, activity: 'None', lightingW: 10, equipW: 0, glaze: 0, glassU: 0, shgc: 0, wallU: 0.35, extWall: false, roof: false, coolSet: 24, heatSet: 20, humMin: 0, humMax: 0, supplyAch: '', returnAch: '', exhaustAch: '', filt: 'G4', pctOA: false, isolation: false, oaMethod: 'AS1668.2', pressure: 'Negative', lsPerson: 0, lsM2: 0, designPress: -10, system: 'AHU-02', exhaustList: [{ desc: 'Print room exhaust', ls: 200, type: 'Continuous' }], equipList: [{ desc: 'Laser Printers', qty: 3, watts: 800 }, { desc: 'Copier', qty: 1, watts: 1500 }] },
+  r1: { tag: 'L1-01', name: 'Open Plan Office', floor: 'Level 1', area: 240, height: 3.0, orientation: 'N', facadeType: 'FT01', facadeWidth: 20, windowWidth: 16, windowHeight: 2.4, exposedRoof: 0, roofType: 'roof_other', occupants: 48, occAreaMin: 24, occCounted: 48, occSelected: 48, oaMethod: 'general', lightingW: 6, equipW: 15, equipPointLoad: 0, coolSet: 23, heatSet: 21, humMin: 40, humMax: 60, saTemp: 12, achReqSupply: 0, achReqOA: 0, infiltration: 0, subZoneTag: 'HWC-L01-01', isReheat: true, filt: 'F7', pctOA: false, isolation: false, pressure: 'Neutral', designPress: 0, system: 'AHU-01', exhaustList: [], equipList: [{ desc: 'Workstations', qty: 48, watts: 120 }, { desc: 'Printers', qty: 2, watts: 500 }] },
+  r2: { tag: 'L1-02', name: 'Meeting Room A', floor: 'Level 1', area: 25, height: 3.0, orientation: 'E', facadeType: 'FT02', facadeWidth: 5, windowWidth: 3, windowHeight: 2.4, exposedRoof: 0, roofType: 'roof_other', occupants: 8, occAreaMin: 2.5, occCounted: 8, occSelected: 8, oaMethod: 'general', lightingW: 6, equipW: 10, equipPointLoad: 350, coolSet: 23, heatSet: 21, humMin: 40, humMax: 60, saTemp: 12, achReqSupply: 0, achReqOA: 0, infiltration: 0, subZoneTag: 'HWC-L01-02', isReheat: true, filt: 'F7', pctOA: false, isolation: false, pressure: 'Neutral', designPress: 0, system: 'AHU-01', exhaustList: [], equipList: [{ desc: 'AV Display', qty: 1, watts: 350 }] },
+  r3: { tag: 'L1-03', name: 'General Lab', floor: 'Level 1', area: 80, height: 3.0, orientation: 'W', facadeType: 'FT01', facadeWidth: 8, windowWidth: 6, windowHeight: 2.4, exposedRoof: 0, roofType: 'roof_other', occupants: 8, occAreaMin: 8, occCounted: 8, occSelected: 8, oaMethod: 'general', lightingW: 6, equipW: 40, equipPointLoad: 0, coolSet: 23, heatSet: 21, humMin: 40, humMax: 60, saTemp: 12, achReqSupply: 8, achReqOA: 4, infiltration: 0, subZoneTag: 'HWC-L01-03', isReheat: true, filt: 'F9', pctOA: false, isolation: false, pressure: 'Negative', designPress: -15, system: 'AHU-01', exhaustList: [{ desc: 'Fume cupboard', ls: 200, type: 'Continuous' }], equipList: [{ desc: 'Lab Equipment', qty: 4, watts: 800 }] },
+  r4: { tag: 'L2-01', name: 'Write-up Office', floor: 'Level 2', area: 60, height: 3.0, orientation: 'S', facadeType: 'FT02', facadeWidth: 10, windowWidth: 8, windowHeight: 2.4, exposedRoof: 0, roofType: 'roof_other', occupants: 6, occAreaMin: 6, occCounted: 6, occSelected: 6, oaMethod: 'green', lightingW: 6, equipW: 15, equipPointLoad: 0, coolSet: 23, heatSet: 21, humMin: 40, humMax: 60, saTemp: 12, achReqSupply: 0, achReqOA: 0, infiltration: 0, subZoneTag: 'HWC-L02-01', isReheat: true, filt: 'F7', pctOA: false, isolation: false, pressure: 'Neutral', designPress: 0, system: 'AHU-02', exhaustList: [], equipList: [] },
+  r5: { tag: 'L8-01', name: 'Rooftop Plant Room', floor: 'Level 8', area: 120, height: 4.0, orientation: 'N', facadeType: 'FT01', facadeWidth: 12, windowWidth: 4, windowHeight: 2.0, exposedRoof: 120, roofType: 'roof_top', occupants: 0, occAreaMin: 12, occCounted: 0, occSelected: 0, oaMethod: 'general', lightingW: 6, equipW: 60, equipPointLoad: 0, coolSet: 23, heatSet: 21, humMin: 0, humMax: 0, saTemp: 12, achReqSupply: 6, achReqOA: 2, infiltration: 5, subZoneTag: '', isReheat: false, filt: 'G4', pctOA: true, isolation: false, pressure: 'Neutral', designPress: 0, system: 'AHU-03', exhaustList: [], equipList: [{ desc: 'Chillers', qty: 2, watts: 5000 }] },
 };
 
-function Field({ label, children, unit, span }: { label: string; children: React.ReactNode; unit?: string; span?: number }) {
+function Field({ label, children, unit, span, hint }: { label: string; children: React.ReactNode; unit?: string; span?: number; hint?: string }) {
   return (
     <div className={span === 2 ? 'col-span-2' : ''}>
       <label className="block text-[11px] font-medium text-muted-foreground mb-1">{label}</label>
@@ -24,6 +19,7 @@ function Field({ label, children, unit, span }: { label: string; children: React
         {children}
         {unit && <span className="text-[10px] text-muted-foreground shrink-0">{unit}</span>}
       </div>
+      {hint && <div className="text-[9px] text-muted-foreground mt-0.5">{hint}</div>}
     </div>
   );
 }
@@ -48,6 +44,14 @@ function Select({ defaultValue, children, className = '' }: { defaultValue?: str
   );
 }
 
+function ReadOnly({ value, highlight }: { value: string | number; highlight?: boolean }) {
+  return (
+    <div className={`h-7 px-2 flex items-center border rounded-sm text-xs font-mono ${highlight ? 'bg-accent border-primary/20 font-bold text-primary' : 'bg-secondary border-border'}`}>
+      {value}
+    </div>
+  );
+}
+
 function SectionHeader({ title }: { title: string }) {
   return <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1 mb-3 mt-6 first:mt-0">{title}</div>;
 }
@@ -59,8 +63,11 @@ export default function RoomDetail() {
   const [exhaustList, setExhaustList] = useState(room.exhaustList || []);
   const [equipList, setEquipList] = useState(room.equipList || []);
 
-  const calcOA = room.occupants * room.lsPerson + room.area * room.lsM2;
   const volume = room.area * room.height;
+  const windowArea = room.windowWidth * room.windowHeight;
+  const facadeArea = room.facadeWidth * room.height;
+  const calcOA = room.occupants * (room.oaMethod === 'green' ? 11.25 : 7.5);
+  const totalEquipW = equipList.reduce((s: number, e: any) => s + e.qty * e.watts, 0);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -84,57 +91,103 @@ export default function RoomDetail() {
         <Field label="Room No."><Input defaultValue="1.01" placeholder="Arch. ref" /></Field>
         <Field label="Room Type">
           <Select defaultValue="General">
-            <option>General</option><option>Server Room</option><option>Kitchen</option><option>Bathroom</option><option>Lab</option><option>Theatre</option><option>Carpark</option>
+            <option>General</option><option>General Lab</option><option>Wet Lab</option><option>Write-up Office</option><option>GMP</option><option>L2D</option><option>Ante / Circulation</option><option>Atrium</option><option>Server Room</option><option>Kitchen</option><option>Bathroom</option>
           </Select>
         </Field>
       </div>
 
-      {/* ─── DIMENSIONS & ENVELOPE ─── */}
-      <SectionHeader title="Dimensions & Envelope" />
+      {/* ─── DIMENSIONS ─── */}
+      <SectionHeader title="Dimensions" />
       <div className="grid grid-cols-5 gap-x-4 gap-y-3">
         <Field label="Floor Area" unit="m²"><Input type="number" defaultValue={room.area} /></Field>
         <Field label="Height" unit="m"><Input type="number" defaultValue={room.height} step="0.1" /></Field>
-        <Field label="Volume" unit="m³">
-          <div className="h-7 px-2 flex items-center bg-secondary border border-border rounded-sm text-xs font-mono">{volume}</div>
-        </Field>
-        <Field label="Orientation">
-          <Select defaultValue={room.orientation}>
-            <option>N</option><option>NE</option><option>E</option><option>SE</option><option>S</option><option>SW</option><option>W</option><option>NW</option><option>Internal</option>
-          </Select>
-        </Field>
+        <Field label="Volume" unit="m³"><ReadOnly value={volume} /></Field>
         <Field label="Served by">
           <Select defaultValue={room.system}>
-            <option>AHU-01</option><option>AHU-02</option><option>FCU-L1-01</option><option>EXH-01</option><option>+ New</option>
+            <option>AHU-01</option><option>AHU-02</option><option>AHU-03</option><option>+ New</option>
           </Select>
+        </Field>
+        <Field label="Sub-zone Tag" hint="e.g. HWC-L01-60">
+          <Input defaultValue={room.subZoneTag} placeholder="HWC-L01-xx" />
         </Field>
       </div>
 
+      {/* ─── FACADE ─── */}
+      <SectionHeader title="Facade" />
+      <div className="grid grid-cols-5 gap-x-4 gap-y-3">
+        <Field label="Orientation">
+          <Select defaultValue={room.orientation}>
+            <option>N</option><option>E</option><option>S</option><option>W</option><option>WS</option><option>S_SHD</option><option>Partition</option><option>Internal</option>
+          </Select>
+        </Field>
+        <Field label="Facade Type">
+          <Select defaultValue={room.facadeType}>
+            <option value="FT01">FT01 — Std Double Glaze</option>
+            <option value="FT02">FT02 — Perf Double Glaze</option>
+            <option value="FT04">FT04 — With Overhang</option>
+            <option value="Partition">Partition</option>
+            <option value="none">Internal (none)</option>
+          </Select>
+        </Field>
+        <Field label="Facade Width" unit="m"><Input type="number" defaultValue={room.facadeWidth} step="0.1" /></Field>
+        <Field label="Facade Area" unit="m²"><ReadOnly value={facadeArea.toFixed(1)} /></Field>
+        <div /> {/* spacer */}
+      </div>
       <div className="grid grid-cols-5 gap-x-4 gap-y-3 mt-3">
-        <Field label="Glazing" unit="%"><Input type="number" defaultValue={room.glaze} /></Field>
-        <Field label="Glass U" unit="W/m²K"><Input type="number" defaultValue={room.glassU} step="0.1" /></Field>
-        <Field label="SHGC"><Input type="number" defaultValue={room.shgc} step="0.05" /></Field>
-        <Field label="Wall U" unit="W/m²K"><Input type="number" defaultValue={room.wallU} step="0.05" /></Field>
-        <div className="flex flex-col gap-1.5 pt-4">
-          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.extWall} className="rounded-sm" /> Ext. wall</label>
-          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.roof} className="rounded-sm" /> Roof</label>
+        <Field label="Window Width" unit="m"><Input type="number" defaultValue={room.windowWidth} step="0.1" /></Field>
+        <Field label="Window Height" unit="m"><Input type="number" defaultValue={room.windowHeight} step="0.1" /></Field>
+        <Field label="Window Area" unit="m²"><ReadOnly value={windowArea.toFixed(1)} /></Field>
+        <div className="flex flex-col gap-1.5 pt-4 col-span-2">
+          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.exposedRoof > 0} className="rounded-sm" /> Has Roof Exposure</label>
         </div>
+      </div>
+      {room.exposedRoof > 0 && (
+        <div className="grid grid-cols-5 gap-x-4 gap-y-3 mt-3">
+          <Field label="Exposed Roof Area" unit="m²"><Input type="number" defaultValue={room.exposedRoof} /></Field>
+          <Field label="Roof Type">
+            <Select defaultValue={room.roofType}>
+              <option value="roof_top">Roof L8 (U=0.238)</option>
+              <option value="roof_other">Other (U=0.27)</option>
+            </Select>
+          </Field>
+        </div>
+      )}
+
+      {/* ─── OCCUPANCY ─── */}
+      <SectionHeader title="Occupancy" />
+      <div className="grid grid-cols-5 gap-x-4 gap-y-3">
+        <Field label="Area minimum" unit="pax" hint="= area / 10">
+          <ReadOnly value={room.occAreaMin} />
+        </Field>
+        <Field label="Counted" unit="pax"><Input type="number" defaultValue={room.occCounted} /></Field>
+        <Field label="Selected (used)" unit="pax" hint="Engineer's choice">
+          <Input type="number" defaultValue={room.occSelected} className="border-primary/40 bg-accent/30" />
+        </Field>
+        <Field label="OA Method">
+          <Select defaultValue={room.oaMethod}>
+            <option value="general">AS1668.2 General (7.5 L/s/p)</option>
+            <option value="green">Green Star (11.25 L/s/p)</option>
+            <option value="custom">Custom</option>
+          </Select>
+        </Field>
+        <Field label="Calculated OA" unit="L/s">
+          <ReadOnly value={calcOA.toFixed(0)} highlight />
+        </Field>
       </div>
 
       {/* ─── INTERNAL LOADS ─── */}
       <SectionHeader title="Internal Loads" />
       <div className="grid grid-cols-5 gap-x-4 gap-y-3">
-        <Field label="Occupants"><Input type="number" defaultValue={room.occupants} /></Field>
-        <Field label="Activity">
-          <Select defaultValue={room.activity}>
-            <option>None</option><option>Seated</option><option>Light Work</option><option>Standing</option><option>Heavy</option>
-          </Select>
-        </Field>
         <Field label="Lighting" unit="W/m²"><Input type="number" defaultValue={room.lightingW} /></Field>
         <Field label="Equipment" unit="W/m²"><Input type="number" defaultValue={room.equipW} /></Field>
-        <Field label="Total equip" unit="W">
-          <div className="h-7 px-2 flex items-center bg-secondary border border-border rounded-sm text-xs font-mono">
-            {equipList.reduce((s: number, e: any) => s + e.qty * e.watts, 0).toLocaleString()}
-          </div>
+        <Field label="Equipment Point Load" unit="W" hint="For specific plant items">
+          <Input type="number" defaultValue={room.equipPointLoad} />
+        </Field>
+        <Field label="Total equip (line items)" unit="W">
+          <ReadOnly value={totalEquipW.toLocaleString()} />
+        </Field>
+        <Field label="Equipment used" unit="W" hint="max(point, W/m² × area)">
+          <ReadOnly value={Math.max(room.equipPointLoad, room.equipW * room.area).toLocaleString()} highlight />
         </Field>
       </div>
 
@@ -174,11 +227,33 @@ export default function RoomDetail() {
         <Plus className="h-3 w-3" /> Add equipment item
       </button>
 
+      {/* ─── SUPPLY AIR ─── */}
+      <SectionHeader title="Supply Air" />
+      <div className="grid grid-cols-5 gap-x-4 gap-y-3">
+        <Field label="SA-T Selected" unit="°C" hint="Off-coil supply air temp">
+          <Input type="number" defaultValue={room.saTemp} step="0.5" className="border-primary/40 bg-accent/30" />
+        </Field>
+        <Field label="ACH Required — Supply" hint="Min from code/brief">
+          <Input type="number" defaultValue={room.achReqSupply} placeholder="e.g. 8" />
+        </Field>
+        <Field label="ACH Required — OA" hint="Min OA from AS1668.2">
+          <Input type="number" defaultValue={room.achReqOA} placeholder="e.g. 4" />
+        </Field>
+        <Field label="Infiltration" unit="L/s" hint="0 for sealed bldgs">
+          <Input type="number" defaultValue={room.infiltration} step="0.1" />
+        </Field>
+        <div className="flex flex-col gap-1.5 pt-4">
+          <label className="flex items-center gap-1.5 text-xs">
+            <input type="checkbox" defaultChecked={room.isReheat} className="rounded-sm" /> HWC Reheat Zone
+          </label>
+        </div>
+      </div>
+
       {/* ─── ENVIRONMENT ─── */}
       <SectionHeader title="Environment" />
       <div className="grid grid-cols-5 gap-x-4 gap-y-3">
-        <Field label="Cooling setpoint" unit="°C"><Input type="number" defaultValue={room.coolSet} /></Field>
-        <Field label="Heating setpoint" unit="°C"><Input type="number" defaultValue={room.heatSet} /></Field>
+        <Field label="Summer Setpoint" unit="°C"><Input type="number" defaultValue={room.coolSet} /></Field>
+        <Field label="Winter Setpoint" unit="°C"><Input type="number" defaultValue={room.heatSet} /></Field>
         <Field label="Min RH" unit="%"><Input type="number" defaultValue={room.humMin} /></Field>
         <Field label="Max RH" unit="%"><Input type="number" defaultValue={room.humMax} /></Field>
         <Field label="Filtration">
@@ -188,38 +263,16 @@ export default function RoomDetail() {
         </Field>
       </div>
       <div className="grid grid-cols-5 gap-x-4 gap-y-3 mt-3">
-        <Field label="Supply ACH" unit="ACH"><Input type="number" defaultValue={room.supplyAch} placeholder="—" /></Field>
-        <Field label="Return ACH" unit="ACH"><Input type="number" defaultValue={room.returnAch} placeholder="—" /></Field>
-        <Field label="Exhaust ACH" unit="ACH"><Input type="number" defaultValue={room.exhaustAch} placeholder="—" /></Field>
-        <div className="flex flex-col gap-1.5 pt-4 col-span-2">
-          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.pctOA} className="rounded-sm" /> 100% Outside Air</label>
-          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.isolation} className="rounded-sm" /> Critical / Isolation</label>
-        </div>
-      </div>
-
-      {/* ─── VENTILATION ─── */}
-      <SectionHeader title="Ventilation & Pressure" />
-      <div className="grid grid-cols-5 gap-x-4 gap-y-3">
-        <Field label="OA Method">
-          <Select defaultValue={room.oaMethod}>
-            <option>AS1668.2</option><option>ASHRAE 62.1</option><option>ACH</option><option>L/s/m²</option><option>Custom</option>
-          </Select>
-        </Field>
-        <Field label="L/s per person" unit="L/s"><Input type="number" defaultValue={room.lsPerson} /></Field>
-        <Field label="L/s per m²" unit="L/s"><Input type="number" defaultValue={room.lsM2} step="0.1" /></Field>
-        <Field label="Calculated OA" unit="L/s">
-          <div className="h-7 px-2 flex items-center bg-accent border border-primary/20 rounded-sm text-xs font-mono font-bold text-primary">
-            {calcOA.toFixed(0)}
-          </div>
-        </Field>
         <Field label="Pressure" unit="Pa">
           <Select defaultValue={room.pressure}>
             <option>Positive</option><option>Neutral</option><option>Negative</option>
           </Select>
         </Field>
-      </div>
-      <div className="grid grid-cols-5 gap-x-4 gap-y-3 mt-3">
         <Field label="Design Pressure" unit="Pa"><Input type="number" defaultValue={room.designPress} /></Field>
+        <div className="flex flex-col gap-1.5 pt-4 col-span-2">
+          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.pctOA} className="rounded-sm" /> 100% Outside Air</label>
+          <label className="flex items-center gap-1.5 text-xs"><input type="checkbox" defaultChecked={room.isolation} className="rounded-sm" /> Critical / Isolation</label>
+        </div>
       </div>
 
       {/* Dedicated exhausts line items */}

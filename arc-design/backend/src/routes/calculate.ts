@@ -30,47 +30,68 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     };
 
     const projectZones = await db.select().from(zones).where(and(eq(zones.projectId, projectId), eq(zones.orgId, orgId)));
-    
+
     const results = [];
     for (const zone of projectZones) {
       const zoneInputs: ZoneInputs = {
+        roomDesc: zone.name,
+        roomCode: zone.tag,
+        ahuTag: zone.systemId ?? '',
+        subZoneTag: zone.subZoneTag ?? '',
         areaM2: Number(zone.areaM2),
         heightM: Number(zone.heightM),
-        orientation: zone.orientation!,
-        hasExternalWall: zone.hasExternalWall!,
-        hasRoof: zone.hasRoof!,
-        glazingPct: Number(zone.glazingPct),
-        wallUValue: Number(zone.wallUValue),
-        glassUValue: Number(zone.glassUValue),
-        glassSHGC: Number(zone.glassShgc),
-        roofUValue: Number(zone.roofUValue),
-        occupants: Number(zone.occupants),
-        occupantActivity: zone.occupantActivity!,
+        winterRoomTempC: Number(zone.tempHeatingC),
+        summerRoomTempC: Number(zone.tempCoolingC),
+        facadeOrientation: zone.orientation ?? 'Internal',
+        facadeType: zone.facadeType ?? 'FT01',
+        facadeWidthM: Number(zone.facadeWidthM ?? 0),
+        windowWidthM: Number(zone.windowWidthM ?? 0),
+        windowHeightM: Number(zone.windowHeightM ?? 0),
+        hasRoof: zone.hasRoof ?? false,
+        exposedRoofAreaM2: Number(zone.exposedRoofM2 ?? 0),
+        roofType: zone.roofType ?? 'roof_other',
+        occupants: Number(zone.occSelected ?? zone.occCounted ?? zone.occupants ?? 0),
+        oaMethod: (zone.oaMethod as 'general' | 'green' | 'custom') ?? 'general',
+        customOaLsPerPerson: zone.customOaLsPerPerson ? Number(zone.customOaLsPerPerson) : undefined,
         lightingWm2: Number(zone.lightingWm2),
         equipmentWm2: Number(zone.equipmentWm2),
-        tempCoolingC: Number(zone.tempCoolingC),
-        tempHeatingC: Number(zone.tempHeatingC),
-        humidityMaxPct: Number(zone.humidityMaxPct),
-        oaMethod: zone.oaMethod as any,
-        oaLsPerPerson: Number(zone.oaLsPerson),
-        oaLsPerM2: Number(zone.oaLsM2),
-        achSupply: zone.achSupply ? Number(zone.achSupply) : undefined,
-        exhaustLs: zone.exhaustLs ? Number(zone.exhaustLs) : undefined,
-        is100PctOA: zone.is100pctOa!,
+        equipmentPointLoadW: zone.equipmentPointLoadW ? Number(zone.equipmentPointLoadW) : undefined,
+        infiltrationLs: Number(zone.infiltrationLs ?? 0),
+        saTemperatureC: Number(zone.saTemperatureC ?? 12),
+        achRequiredSupply: Number(zone.achRequiredSupply ?? 0),
+        achRequiredOA: Number(zone.achRequiredOA ?? 0),
+        isHWCReheatZone: zone.isReheatZone ?? false,
       };
 
       const loadResult = calculateZoneLoads(zoneInputs, climateInputs);
-      
+
       const updated = await db.update(zones).set({
-        calcCoolingSensibleKw: (loadResult.totalSensibleW / 1000).toString(),
-        calcCoolingLatentKw: (loadResult.totalLatentW / 1000).toString(),
-        calcCoolingTotalKw: (loadResult.totalCoolingW / 1000).toString(),
-        calcHeatingKw: (loadResult.totalHeatingW / 1000).toString(),
+        calcCoolingSensibleKw: (loadResult.totalSensibleW / 1000).toFixed(3),
+        calcCoolingLatentKw: (loadResult.peopleLatentW / 1000).toFixed(3),
+        calcCoolingTotalKw: (loadResult.totalCoolingW / 1000).toFixed(3),
+        calcHeatingKw: (loadResult.totalHeatingW / 1000).toFixed(3),
         calcSupplyLs: loadResult.supplyLs.toString(),
         calcOaLs: loadResult.oaLs.toString(),
         calcSupplyTempC: loadResult.supplyTempC.toString(),
-        calcSupplyRhPct: loadResult.supplyRhPct.toString(),
         calcWPerM2: loadResult.wPerM2.toString(),
+        // Detailed breakdown
+        calcGlassSolarW: loadResult.glassSolarW.toFixed(1),
+        calcWallTransW: loadResult.wallTransmissionW.toFixed(1),
+        calcRoofTransW: loadResult.roofTransmissionW.toFixed(1),
+        calcInfiltrationW: loadResult.infiltrationW.toFixed(1),
+        calcSaForLoadLs: loadResult.saForLoadLs.toFixed(1),
+        calcOaForOccLs: loadResult.oaForOccupancyLs.toFixed(1),
+        calcSaAch: loadResult.saAchCalculated.toFixed(2),
+        calcOaAch: loadResult.oaAchCalculated.toFixed(2),
+        calcSaTempRequiredC: loadResult.saTempRequired.toFixed(1),
+        calcRoomTempResultC: loadResult.roomTempIfSaTRemains.toFixed(1),
+        calcLatentWPerLs: loadResult.latentWPerLs.toFixed(2),
+        // Heating breakdown
+        calcHeatingGlassW: loadResult.heatingGlassW.toFixed(1),
+        calcHeatingFacadeW: loadResult.heatingFacadeW.toFixed(1),
+        calcHeatingRoofW: loadResult.heatingRoofW.toFixed(1),
+        calcHeatingTotalW: loadResult.heatingTotalW.toFixed(1),
+        calcHtgSaTempC: loadResult.heatingRequiredSATempC.toFixed(1),
         calcAt: new Date(),
       }).where(eq(zones.id, zone.id)).returning();
 
