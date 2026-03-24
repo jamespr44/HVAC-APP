@@ -65,61 +65,110 @@ export const zones = pgTable('zones', {
   orgId: uuid('org_id').notNull().references(() => organisations.id),
   floorId: uuid('floor_id').notNull().references(() => floors.id),
   systemId: uuid('system_id').references(() => hvacSystems.id),
-  
+
   tag: text('tag').notNull(),
   name: text('name').notNull(),
   roomNumber: text('room_number'),
 
   areaM2: numeric('area_m2').notNull(),
   heightM: numeric('height_m').notNull().default('3.0'),
-  volumeM3: numeric('volume_m3'), // Set in application logic since Drizzle generated columns syntax varies slightly by version
+  volumeM3: numeric('volume_m3'),
 
+  // Orientation & facade
   orientation: text('orientation').default('Internal'),
+  facadeType: text('facade_type').default('FT01'),           // FT01 | FT02 | FT04 | Partition
+  facadeWidthM: numeric('facade_width_m').default('0'),
+  windowWidthM: numeric('window_width_m').default('0'),
+  windowHeightM: numeric('window_height_m').default('0'),
+
+  // Legacy envelope fields (kept for backwards compat)
   hasExternalWall: boolean('has_external_wall').default(true),
   hasRoof: boolean('has_roof').default(false),
+  exposedRoofM2: numeric('exposed_roof_m2').default('0'),
+  roofType: text('roof_type').default('roof_other'),          // roof_top | roof_other
   glazingPct: numeric('glazing_pct').default('20'),
   wallUValue: numeric('wall_u_value').default('0.35'),
   glassUValue: numeric('glass_u_value').default('2.8'),
   glassShgc: numeric('glass_shgc').default('0.4'),
   roofUValue: numeric('roof_u_value').default('0.2'),
 
+  // Occupancy
   occupants: integer('occupants').default(0),
+  occAreaMin: numeric('occ_area_min'),                       // area / 10 (auto-calc)
+  occCounted: integer('occ_counted'),                        // counted occupants
+  occSelected: numeric('occ_selected'),                      // selected (engineer choice)
   occupantActivity: text('occupant_activity').default('seated'),
   occupantSchedule: text('occupant_schedule').default('office_hours'),
-  lightingWm2: numeric('lighting_w_m2').default('12'),
-  equipmentWm2: numeric('equipment_w_m2').default('15'),
+  oaMethod: text('oa_method').default('general'),            // general | green | custom
+  customOaLsPerPerson: numeric('custom_oa_l_s_person'),
 
-  tempCoolingC: numeric('temp_cooling_c').default('24'),
-  tempHeatingC: numeric('temp_heating_c').default('20'),
+  // Internal loads
+  lightingWm2: numeric('lighting_w_m2').default('6'),
+  equipmentWm2: numeric('equipment_w_m2').default('15'),
+  equipmentPointLoadW: numeric('equipment_point_load_w'),
+
+  // Environment
+  tempCoolingC: numeric('temp_cooling_c').default('23'),
+  tempHeatingC: numeric('temp_heating_c').default('21'),
   humidityMinPct: numeric('humidity_min_pct').default('40'),
   humidityMaxPct: numeric('humidity_max_pct').default('60'),
 
+  // Supply air & ventilation
+  saTemperatureC: numeric('sa_temp_selected_c').default('12'),
+  achRequiredSupply: numeric('ach_required_supply').default('0'),
+  achRequiredOA: numeric('ach_required_oa').default('0'),
+  infiltrationLs: numeric('infiltration_l_s').default('0'),
   achSupply: numeric('ach_supply'),
   achReturn: numeric('ach_return'),
   achExhaust: numeric('ach_exhaust'),
-  oaMethod: text('oa_method').default('ashrae_62'),
-  oaLsPerson: numeric('oa_l_s_person').default('10'),
-  oaLsM2: numeric('oa_l_s_m2').default('0.5'),
+  oaLsPerson: numeric('oa_l_s_person').default('7.5'),
+  oaLsM2: numeric('oa_l_s_m2').default('0'),
   exhaustLs: numeric('exhaust_l_s'),
 
+  // Pressure
   pressureRegime: text('pressure_regime').default('neutral'),
   pressurePa: numeric('pressure_pa').default('0'),
 
+  // System classification
+  subZoneTag: text('sub_zone_tag'),                          // HWC-L01-xx tag
+  isReheatZone: boolean('is_reheat_zone').default(false),
   filtrationClass: text('filtration_class').default('F7'),
   is100pctOa: boolean('is_100pct_oa').default(false),
   cleanlinessClass: text('cleanliness_class'),
   isCriticalSpace: boolean('is_critical_space').default(false),
   zoneType: text('zone_type').default('general'),
 
+  // ── Calculated results (cooling) ──
   calcCoolingSensibleKw: numeric('calc_cooling_sensible_kw'),
   calcCoolingLatentKw: numeric('calc_cooling_latent_kw'),
   calcCoolingTotalKw: numeric('calc_cooling_total_kw'),
-  calcHeatingKw: numeric('calc_heating_kw'),
   calcSupplyLs: numeric('calc_supply_l_s'),
   calcOaLs: numeric('calc_oa_l_s'),
   calcSupplyTempC: numeric('calc_supply_temp_c'),
   calcSupplyRhPct: numeric('calc_supply_rh_pct'),
   calcWPerM2: numeric('calc_w_per_m2'),
+
+  // ── Calculated results (detailed breakdown) ──
+  calcGlassSolarW: numeric('calc_glass_solar_w'),
+  calcWallTransW: numeric('calc_wall_trans_w'),
+  calcRoofTransW: numeric('calc_roof_trans_w'),
+  calcInfiltrationW: numeric('calc_infiltration_w'),
+  calcSaForLoadLs: numeric('calc_sa_for_load_l_s'),
+  calcOaForOccLs: numeric('calc_oa_for_occ_l_s'),
+  calcSaAch: numeric('calc_sa_ach'),
+  calcOaAch: numeric('calc_oa_ach'),
+  calcSaTempRequiredC: numeric('calc_sa_temp_required_c'),
+  calcRoomTempResultC: numeric('calc_room_temp_result_c'),
+  calcLatentWPerLs: numeric('calc_latent_w_per_ls'),
+
+  // ── Calculated results (heating) ──
+  calcHeatingKw: numeric('calc_heating_kw'),
+  calcHeatingGlassW: numeric('calc_heating_glass_w'),
+  calcHeatingFacadeW: numeric('calc_heating_facade_w'),
+  calcHeatingRoofW: numeric('calc_heating_roof_w'),
+  calcHeatingTotalW: numeric('calc_heating_total_w'),
+  calcHtgSaTempC: numeric('calc_htg_sa_temp_c'),
+
   calcAt: timestamp('calc_at', { withTimezone: true }),
 
   sortOrder: integer('sort_order').default(0),
@@ -139,7 +188,7 @@ export const zoneChanges = pgTable('zone_changes', {
   userId: uuid('user_id').references(() => users.id),
   changedFields: jsonb('changed_fields').notNull(),
   reason: text('reason'),
-  revisionId: uuid('revision_id'), // Will reference revisions later
+  revisionId: uuid('revision_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   zoneIdx: index('idx_zone_changes_zone').on(table.zoneId),
