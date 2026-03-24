@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 
+function syncZoneSchedulesWithProjectSettings() {
+  // Lazy import prevents a static cycle: zoneStore already imports projectStore for calculations.
+  void import('./zoneStore').then(({ useZoneStore }) => {
+    useZoneStore.getState().recalculateAllZones();
+  });
+}
+
 // ─── REFERENCE LOADS (AIRAH DA09 / ASHRAE 90.1 benchmarks) ─────────────────
 export const REFERENCE_LOADS: Record<string, {
   label: string;
@@ -307,13 +314,25 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   chillers: DEFAULT_CHILLERS,
   coolingTowers: buildCoolingTowers(DEFAULT_CHILLERS),
 
-  setInfo: (patch) => set((s) => ({ info: { ...s.info, ...patch } })),
+  setInfo: (patch) => {
+    set((s) => ({ info: { ...s.info, ...patch } }));
+    syncZoneSchedulesWithProjectSettings();
+  },
 
-  addFacadeType: (ft) => set((s) => ({ customFacadeTypes: [...s.customFacadeTypes, ft] })),
-  updateFacadeType: (id, patch) => set((s) => ({
-    customFacadeTypes: s.customFacadeTypes.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-  })),
-  removeFacadeType: (id) => set((s) => ({ customFacadeTypes: s.customFacadeTypes.filter((f) => f.id !== id) })),
+  addFacadeType: (ft) => {
+    set((s) => ({ customFacadeTypes: [...s.customFacadeTypes, ft] }));
+    syncZoneSchedulesWithProjectSettings();
+  },
+  updateFacadeType: (id, patch) => {
+    set((s) => ({
+      customFacadeTypes: s.customFacadeTypes.map((f) => (f.id === id ? { ...f, ...patch } : f)),
+    }));
+    syncZoneSchedulesWithProjectSettings();
+  },
+  removeFacadeType: (id) => {
+    set((s) => ({ customFacadeTypes: s.customFacadeTypes.filter((f) => f.id !== id) }));
+    syncZoneSchedulesWithProjectSettings();
+  },
   addRoomTypePreset: (id, data) => set((s) => ({ roomTypePresets: { ...s.roomTypePresets, [id]: data } })),
 
   addAHU: () => {
