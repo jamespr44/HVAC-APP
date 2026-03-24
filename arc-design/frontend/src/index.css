@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  /* Professional engineering software palette — light, sharp, clean */
+  --color-background: #f7f8fa;
+  --color-foreground: #1a1d23;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1d23;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1d23;
+
+  --color-primary: #1925AA;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #edf2f7;
+  --color-secondary-foreground: #2d3748;
+
+  --color-muted: #edf2f7;
+  --color-muted-foreground: #718096;
+
+  --color-accent: #ebf4ff;
+  --color-accent-foreground: #2c5282;
+
+  --color-destructive: #c53030;
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #2c5282;
+
+  --color-sidebar: #ffffff;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-active: #ebf4ff;
+
+  --radius: 0.25rem;
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .heading, .title {
+  font-family: var(--font-heading);
+  color: #1925AA;
+}
+
+/* Override default Tailwind border radius to be sharper */
+.rounded-xl { border-radius: 0.25rem; }
+.rounded-lg { border-radius: 0.25rem; }
+.rounded-md { border-radius: 0.2rem; }
+
+/* Dense table styling */
+table { font-size: 12px; }
+
+/* Scrollbar styling for a professional feel */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Form inputs — sharper, compact */
+input, select, textarea {
+  font-size: 13px;
+  border-radius: 0.2rem;
+}
+
+/* Focus ring */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.2);
+  border-color: #2c5282;
+}
