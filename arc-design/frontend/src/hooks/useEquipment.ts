@@ -21,6 +21,9 @@ export interface Equipment {
   refrigerantChargeKg?: number;
   thermalFluidType?: string;
   inOperation: boolean;
+  diversityFactor?: number;
+  partLoadPercentage?: number;
+  usageProfile?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,6 +46,9 @@ export interface EquipmentInput {
   thermalFluidType?: string;
   inOperation?: boolean;
   zoneId?: string;
+  diversityFactor?: number;
+  partLoadPercentage?: number;
+  usageProfile?: string;
 }
 
 const API_BASE = '/api/projects';

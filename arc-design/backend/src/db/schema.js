@@ -172,7 +172,7 @@ exports.zoneChanges = (0, pg_core_1.pgTable)('zone_changes', {
     createdAt: (0, pg_core_1.timestamp)('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
     zoneIdx: (0, pg_core_1.index)('idx_zone_changes_zone').on(table.zoneId),
-    tsIdx: (0, pg_core_1.index)('idx_zone_changes_ts').on(table.createdAt).desc(),
+    tsIdx: (0, pg_core_1.index)('idx_zone_changes_ts').on(table.createdAt),
 }));
 exports.revisions = (0, pg_core_1.pgTable)('revisions', {
     id: (0, pg_core_1.uuid)('id').defaultRandom().primaryKey(),
@@ -238,6 +238,10 @@ exports.equipment = (0, pg_core_1.pgTable)('equipment', {
     refrigerantChargeKg: (0, pg_core_1.numeric)('refrigerant_charge_kg'),
     thermalFluidType: (0, pg_core_1.text)('thermal_fluid_type'), // 'water', 'glycol_mix', etc.
     inOperation: (0, pg_core_1.boolean)('in_operation').default(true),
+    // Load calculation & diversification
+    diversityFactor: (0, pg_core_1.numeric)('diversity_factor').default('1.0'), // 0-1: % of equipment operating simultaneously
+    partLoadPercentage: (0, pg_core_1.numeric)('part_load_percentage').default('100'), // 0-100: equipment running at % of full capacity
+    usageProfile: (0, pg_core_1.text)('usage_profile').default('peak'), // 'peak' (100%) | 'average' (80%) | 'low' (50%) | 'custom'
     createdAt: (0, pg_core_1.timestamp)('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: (0, pg_core_1.timestamp)('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({

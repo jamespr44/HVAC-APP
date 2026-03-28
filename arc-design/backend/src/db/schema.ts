@@ -192,7 +192,7 @@ export const zoneChanges = pgTable('zone_changes', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   zoneIdx: index('idx_zone_changes_zone').on(table.zoneId),
-  tsIdx: index('idx_zone_changes_ts').on(table.createdAt).desc(),
+  tsIdx: index('idx_zone_changes_ts').on(table.createdAt),
 }));
 
 export const revisions = pgTable('revisions', {
@@ -267,6 +267,11 @@ export const equipment = pgTable('equipment', {
   thermalFluidType: text('thermal_fluid_type'), // 'water', 'glycol_mix', etc.
 
   inOperation: boolean('in_operation').default(true),
+
+  // Load calculation & diversification
+  diversityFactor: numeric('diversity_factor').default('1.0'), // 0-1: % of equipment operating simultaneously
+  partLoadPercentage: numeric('part_load_percentage').default('100'), // 0-100: equipment running at % of full capacity
+  usageProfile: text('usage_profile').default('peak'), // 'peak' (100%) | 'average' (80%) | 'low' (50%) | 'custom'
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

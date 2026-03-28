@@ -1,6 +1,8 @@
 import { useZoneStore, ZoneInputs, selectVAV } from '@/store/zoneStore';
 import { useProjectStore, REFERENCE_LOADS } from '@/store/projectStore';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ZoneEquipmentLoads } from '@/components/project/ZoneEquipmentLoads';
+import { useParams } from 'react-router-dom';
 
 const SEL = 'bg-[#1925AA] text-white border-[#1925AA]';
 const UNSEL = 'bg-transparent text-muted-foreground border-border hover:bg-muted';
@@ -29,6 +31,7 @@ const selectCls = 'w-full h-7 px-2 border border-input bg-white text-foreground 
 export default function Zones() {
   const { zones, selectedId, setSelectedId, updateZone, addZone } = useZoneStore();
   const { customFacadeTypes } = useProjectStore();
+  const { projectId } = useParams<{ projectId: string }>();
   const active = zones.find(z => z.inputs.id === selectedId) ?? zones[0];
   const { inputs: z, results: r } = active;
 
@@ -316,6 +319,19 @@ export default function Zones() {
                 </div>
                 <div className="mt-2 px-3 py-2 bg-secondary/40 rounded-sm text-[10px] text-muted-foreground font-mono">
                   Lighting: <strong>{r.lightingW.toFixed(0)} W</strong> · Equipment: <strong>{r.equipmentW.toFixed(0)} W</strong> = max({z.equipmentPointLoadW} pt load, {(z.equipmentWm2 * z.areaM2).toFixed(0)} W/m²×area)
+                </div>
+              </div>
+
+              {/* Equipment from Catalog */}
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-b pb-1 mb-3">Equipment from Catalog</div>
+                {projectId ? (
+                  <ZoneEquipmentLoads projectId={projectId} zoneId={z.id} />
+                ) : (
+                  <div className="text-xs text-muted-foreground">Project ID not found</div>
+                )}
+                <div className="mt-2 text-[9px] text-muted-foreground">
+                  Equipment from the Equipment Catalog (assigned to this zone) is included in zone load calculations with diversification factors applied.
                 </div>
               </div>
             </TabsContent>

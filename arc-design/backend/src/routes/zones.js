@@ -5,6 +5,7 @@ const db_1 = require("../db");
 const schema_1 = require("../db/schema");
 const drizzle_orm_1 = require("drizzle-orm");
 const auth_1 = require("../middleware/auth");
+const equipmentLoadCalculator_1 = require("../services/equipmentLoadCalculator");
 const router = (0, express_1.Router)({ mergeParams: true });
 router.use(auth_1.requireAuth);
 router.get('/', async (req, res) => {
@@ -90,6 +91,33 @@ router.get('/:zoneId/changes', async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ error: 'Failed to fetch zone changes' });
+    }
+});
+router.get('/:zoneId/equipment-loads', async (req, res) => {
+    const orgId = req.user.org_id;
+    const { zoneId } = req.params;
+    try {
+        // Verify zone belongs to this org
+        const zone = await db_1.db.select().from(schema_1.zones)
+            .where((0, drizzle_orm_1.and)((0, drizzle_orm_1.eq)(schema_1.zones.id, zoneId), (0, drizzle_orm_1.eq)(schema_1.zones.orgId, orgId)))
+            .limit(1);
+        if (!zone.length) {
+            return res.status(404).json({ error: 'Zone not found' });
+        }
+        const equipmentLoads = await (0, equipmentLoadCalculator_1.getZoneEquipmentLoads)(zoneId, orgId);
+        res.json({
+            zoneId,
+            zoneName: zone[0].name,
+            totalSensibleW: equipmentLoads.totalSensibleW,
+            totalLatentW: equipmentLoads.totalLatentW,
+            totalW: equipmentLoads.totalSensibleW + equipmentLoads.totalLatentW,
+            count: equipmentLoads.equipmentBreakdown.length,
+            equipmentBreakdown: equipmentLoads.equipmentBreakdown,
+        });
+    }
+    catch (error) {
+        console.error('Error fetching zone equipment loads:', error);
+        res.status(500).json({ error: 'Failed to fetch equipment loads' });
     }
 });
 exports.default = router;

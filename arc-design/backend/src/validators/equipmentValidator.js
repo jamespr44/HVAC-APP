@@ -119,6 +119,37 @@ function validateEquipmentInput(input) {
             }
         }
     }
+    // Diversification validation
+    if (input.diversityFactor !== undefined && input.diversityFactor !== null) {
+        const factor = parseFloat(input.diversityFactor);
+        if (factor < 0 || factor > 1) {
+            errors.push({
+                field: 'diversityFactor',
+                message: 'Diversity factor must be between 0 and 1 (0-100% of equipment operating)',
+                severity: 'error'
+            });
+        }
+    }
+    if (input.partLoadPercentage !== undefined && input.partLoadPercentage !== null) {
+        const percentage = parseFloat(input.partLoadPercentage);
+        if (percentage < 0 || percentage > 100) {
+            errors.push({
+                field: 'partLoadPercentage',
+                message: 'Part load percentage must be between 0 and 100',
+                severity: 'error'
+            });
+        }
+    }
+    if (input.usageProfile !== undefined && input.usageProfile !== null) {
+        const validProfiles = ['peak', 'average', 'low', 'custom'];
+        if (!validProfiles.includes(input.usageProfile)) {
+            errors.push({
+                field: 'usageProfile',
+                message: `Usage profile must be one of: ${validProfiles.join(', ')}`,
+                severity: 'error'
+            });
+        }
+    }
     return errors;
 }
 function validateEquipmentAgainstZone(equipmentCapacityW, zoneTotalCoolingW) {

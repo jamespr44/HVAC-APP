@@ -12,7 +12,6 @@
     "@supabase/supabase-js": "^2.99.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.30.10",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.11.5",
@@ -27,6 +26,7 @@
     "@types/node": "^20.12.7",
     "@types/pg": "^8.11.6",
     "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
     "tsx": "^4.7.2",
     "typescript": "^5.4.5"
   }

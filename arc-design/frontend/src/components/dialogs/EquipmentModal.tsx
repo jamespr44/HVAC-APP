@@ -12,10 +12,13 @@ interface EquipmentModalProps {
 }
 
 export function EquipmentModal({ isOpen, equipment, onClose, onSubmit, isLoading, errorMessage }: EquipmentModalProps) {
-  const [formData, setFormData] = useState<EquipmentInput>({
+  const [formData, setFormData] = useState<EquipmentInput & { diversityFactor?: number; partLoadPercentage?: number; usageProfile?: string }>({
     equipmentType: 'ahu',
     name: '',
     inOperation: true,
+    diversityFactor: 1.0,
+    partLoadPercentage: 100,
+    usageProfile: 'peak',
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -40,9 +43,12 @@ export function EquipmentModal({ isOpen, equipment, onClose, onSubmit, isLoading
         thermalFluidType: equipment.thermalFluidType,
         inOperation: equipment.inOperation,
         zoneId: equipment.zoneId,
+        diversityFactor: (equipment as any).diversityFactor || 1.0,
+        partLoadPercentage: (equipment as any).partLoadPercentage || 100,
+        usageProfile: (equipment as any).usageProfile || 'peak',
       });
     } else {
-      setFormData({ equipmentType: 'ahu', name: '', inOperation: true });
+      setFormData({ equipmentType: 'ahu', name: '', inOperation: true, diversityFactor: 1.0, partLoadPercentage: 100, usageProfile: 'peak' });
     }
     setValidationErrors({});
   }, [equipment, isOpen]);
@@ -325,6 +331,65 @@ export function EquipmentModal({ isOpen, equipment, onClose, onSubmit, isLoading
               </div>
             </div>
           )}
+
+          {/* Load Diversification */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-sm">Load Diversification</h3>
+            <p className="text-xs text-muted-foreground">Controls how equipment load contributes to zone load calculation</p>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-medium mb-1.5">Diversity Factor</label>
+                <div className="space-y-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={formData.diversityFactor || 1.0}
+                    onChange={(e) => handleChange('diversityFactor', parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-center font-mono">{((formData.diversityFactor || 1.0) * 100).toFixed(0)}% operating</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1.5">Part Load %</label>
+                <div className="space-y-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={formData.partLoadPercentage || 100}
+                    onChange={(e) => handleChange('partLoadPercentage', parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-center font-mono">{(formData.partLoadPercentage || 100).toFixed(0)}%</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium mb-1.5">Usage Profile</label>
+                <select
+                  value={formData.usageProfile || 'peak'}
+                  onChange={(e) => handleChange('usageProfile', e.target.value)}
+                  className="w-full px-3 py-2 border border-input rounded text-sm"
+                >
+                  <option value="peak">Peak (100%)</option>
+                  <option value="average">Average (80%)</option>
+                  <option value="low">Low (50%)</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="text-xs text-muted-foreground bg-secondary/30 p-2 rounded">
+              <div className="font-mono">Effective Load = Raw Load × Diversity × Part Load × Profile</div>
+              <div className="mt-1">Example: 10kW × {(formData.diversityFactor || 1.0).toFixed(2)} × {((formData.partLoadPercentage || 100) / 100).toFixed(2)} × {(({ peak: 1.0, average: 0.8, low: 0.5, custom: 1.0 } as any)[formData.usageProfile || 'peak']).toFixed(2)} = {(10000 * (formData.diversityFactor || 1.0) * ((formData.partLoadPercentage || 100) / 100) * (({ peak: 1.0, average: 0.8, low: 0.5, custom: 1.0 } as any)[formData.usageProfile || 'peak'])).toFixed(0)}W</div>
+            </div>
+          </div>
 
           {/* Status */}
           <div className="space-y-4">
