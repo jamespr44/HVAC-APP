@@ -236,3 +236,62 @@ export const climateData = pgTable('climate_data', {
   altitudeM: integer('altitude_m').default(0),
   bomStationId: text('bom_station_id'),
 });
+
+export const equipment = pgTable('equipment', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id').notNull().references(() => projects.id),
+  orgId: uuid('org_id').notNull().references(() => organisations.id),
+  zoneId: uuid('zone_id').references(() => zones.id),
+
+  // Identification
+  equipmentType: text('equipment_type').notNull(), // 'ahu', 'fcu', 'fan', 'pump'
+  name: text('name').notNull(),
+  model: text('model'),
+  manufacturer: text('manufacturer'),
+
+  // Performance specs
+  airFlowRateM3Sec: numeric('air_flow_rate_m3_sec'), // m³/s (for air-based equipment)
+  sensibleCapacityW: numeric('sensible_capacity_w'),
+  latentCapacityW: numeric('latent_capacity_w'),
+  totalCapacityW: numeric('total_capacity_w'),
+  powerInputW: numeric('power_input_w'),
+  copOrEfficiency: numeric('cop_or_efficiency'), // COP or efficiency %
+
+  // Pump-specific
+  flowRateLPerMin: numeric('flow_rate_l_per_min'),
+  headKpa: numeric('head_kpa'),
+
+  // Refrigerant & thermal fluid
+  refrigerantType: text('refrigerant_type'), // 'R410A', 'R32', 'R454B', etc.
+  refrigerantChargeKg: numeric('refrigerant_charge_kg'),
+  thermalFluidType: text('thermal_fluid_type'), // 'water', 'glycol_mix', etc.
+
+  inOperation: boolean('in_operation').default(true),
+
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  projectIdx: index('idx_equipment_project').on(table.projectId),
+  zoneIdx: index('idx_equipment_zone').on(table.zoneId),
+}));
+
+export const equipmentMaintenance = pgTable('equipment_maintenance', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  equipmentId: uuid('equipment_id').notNull().references(() => equipment.id),
+  orgId: uuid('org_id').notNull().references(() => organisations.id),
+
+  maintenanceType: text('maintenance_type').notNull(), // 'filter_change', 'refrigerant_recharge', 'service', 'calibration'
+  scheduledDate: timestamp('scheduled_date', { withTimezone: true }),
+  description: text('description'),
+
+  lastCompletedDate: timestamp('last_completed_date', { withTimezone: true }),
+  nextDueDate: timestamp('next_due_date', { withTimezone: true }),
+
+  frequencyDays: integer('frequency_days'), // e.g., 90 days for filter change
+
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  equipmentIdx: index('idx_maintenance_equipment').on(table.equipmentId),
+  nextDueIdx: index('idx_maintenance_due_date').on(table.nextDueDate),
+}));
