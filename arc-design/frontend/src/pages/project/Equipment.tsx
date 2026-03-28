@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, AlertCircle } from 'lucide-react';
 import { useEquipment, useCreateEquipment, useUpdateEquipment, useDeleteEquipment, Equipment, EquipmentInput } from '@/hooks/useEquipment';
@@ -58,8 +58,6 @@ export default function EquipmentPage() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
-
-  const isLoading = equipmentQuery.isLoading || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   return (
     <div className="space-y-6">

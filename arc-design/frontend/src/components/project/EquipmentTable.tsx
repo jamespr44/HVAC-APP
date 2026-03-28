@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Trash2, Edit2, Plus } from 'lucide-react';
 import { Equipment } from '@/hooks/useEquipment';
 

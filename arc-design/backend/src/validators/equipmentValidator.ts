@@ -1,6 +1,7 @@
 export interface ValidationError {
   field: string;
   message: string;
+  severity?: 'error' | 'warning';
 }
 
 export function validateEquipmentInput(input: any): ValidationError[] {
